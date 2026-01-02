@@ -16,11 +16,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Default port (Railway will override with PORT env var)
-ENV PORT=8000
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
 
 # Expose port
 EXPOSE 8000
 
-# Start command using shell form for variable expansion
-CMD uvicorn empathetic_ai:app --host 0.0.0.0 --port $PORT
+# Use entrypoint script
+ENTRYPOINT ["./entrypoint.sh"]
