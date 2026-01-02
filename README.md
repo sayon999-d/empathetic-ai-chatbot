@@ -1,4 +1,4 @@
-# 🧠 Empathetic AI Chatbot
+#  Empathetic AI Chatbot
 
 An AI-powered chatbot that detects emotions and responds with empathy using Google's Gemini AI. Built with FastAPI backend and Next.js frontend.
 
@@ -6,17 +6,17 @@ An AI-powered chatbot that detects emotions and responds with empathy using Goog
 ![Python](https://img.shields.io/badge/python-3.9+-green.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)
 
-## ✨ Features
+##  Features
 
-- 🎭 **Emotion Detection** - Automatically detects user emotions (joy, sadness, anger, fear, neutral)
-- 💬 **Empathetic Responses** - AI responds with appropriate empathy strategies
-- 🔐 **Secure Authentication** - JWT-based auth with bcrypt password hashing
-- 🔑 **Google OAuth** - Sign in with Google support
-- 📊 **Emotion Analytics** - Track emotional patterns over time
-- ⚡ **Real-time Chat** - WebSocket support for instant messaging
-- 🛡️ **Rate Limiting** - Protection against abuse
+-  **Emotion Detection** - Automatically detects user emotions (joy, sadness, anger, fear, neutral)
+-  **Empathetic Responses** - AI responds with appropriate empathy strategies
+-  **Secure Authentication** - JWT-based auth with bcrypt password hashing
+-  **Google OAuth** - Sign in with Google support
+-  **Emotion Analytics** - Track emotional patterns over time
+-  **Real-time Chat** - WebSocket support for instant messaging
+-  **Rate Limiting** - Protection against abuse
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Backend
 - **FastAPI** - Modern Python web framework
@@ -31,7 +31,7 @@ An AI-powered chatbot that detects emotions and responds with empathy using Goog
 - **TailwindCSS** - Styling
 - **Lucide React** - Icons
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -90,7 +90,7 @@ An AI-powered chatbot that detects emotions and responds with empathy using Goog
 
 7. **Open** http://localhost:3000
 
-## 📝 Environment Variables
+##  Environment Variables
 
 ### Backend (.env)
 
@@ -114,7 +114,7 @@ An AI-powered chatbot that detects emotions and responds with empathy using Goog
 | `NEXT_PUBLIC_API_URL` | Backend API URL |
 | `NEXT_PUBLIC_WS_URL` | WebSocket URL |
 
-## 🔒 Security Features
+##  Security Features
 
 - ✅ bcrypt password hashing
 - ✅ JWT access & refresh tokens
@@ -124,7 +124,7 @@ An AI-powered chatbot that detects emotions and responds with empathy using Goog
 - ✅ CORS protection
 - ✅ Secure OAuth code exchange
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 emotion-ai/
@@ -144,7 +144,7 @@ emotion-ai/
 └── README.md
 ```
 
-## 🌐 API Endpoints
+##  API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -157,7 +157,7 @@ emotion-ai/
 | GET | `/health` | Health check |
 | WS | `/ws/chat` | WebSocket chat |
 
-## 📊 Emotion Detection
+##  Emotion Detection
 
 The chatbot detects the following emotions:
 
@@ -169,7 +169,7 @@ The chatbot detects the following emotions:
 | 😊 Joy | happy, good | Celebration |
 | 😐 Neutral | (default) | Listening |
 
-## 🚀 Deployment
+##  Deployment
 
 ### Recommended Stack
 
@@ -178,15 +178,15 @@ The chatbot detects the following emotions:
 - **Database**: [Supabase](https://supabase.com) (PostgreSQL)
 - **Redis**: [Upstash](https://upstash.com)
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👤 Author
+##  Author
 
 **Sayon Manna**
 
