@@ -174,7 +174,7 @@ The chatbot detects the following emotions:
 ### Recommended Stack
 
 - **Frontend**: [Vercel](https://vercel.com)
-- **Backend**: [Railway](https://railway.app)
+- **Backend**: [Render](https://render.com)
 - **Database**: [Supabase](https://supabase.com) (PostgreSQL)
 - **Redis**: [Upstash](https://upstash.com)
 
