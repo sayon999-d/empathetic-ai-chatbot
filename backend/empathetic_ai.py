@@ -407,15 +407,29 @@ def ollama(prompt: str):
     return r.stdout.strip()
 
 def emotion_agent(text: str):
+    """Detect emotion from text using keyword matching."""
     t = text.lower()
-    if any(w in t for w in ["sad", "empty", "lost"]):
+    
+    # Sadness keywords
+    if any(w in t for w in ["sad", "empty", "lost", "depressed", "lonely", "crying", "tears", "hopeless", "hurt", "broken", "miss", "grief"]):
         return "sadness"
-    if any(w in t for w in ["angry", "mad"]):
+    
+    # Anger keywords  
+    if any(w in t for w in ["angry", "mad", "furious", "annoyed", "frustrated", "hate", "pissed", "irritated", "rage"]):
         return "anger"
-    if any(w in t for w in ["fear", "anxious"]):
+    
+    # Fear/anxiety keywords
+    if any(w in t for w in ["fear", "anxious", "scared", "worried", "nervous", "panic", "stress", "overwhelmed", "terrified", "afraid"]):
         return "fear"
-    if any(w in t for w in ["happy", "good"]):
+    
+    # Joy keywords
+    if any(w in t for w in ["happy", "good", "great", "excited", "wonderful", "amazing", "love", "joy", "blessed", "grateful", "awesome"]):
         return "joy"
+    
+    # Check for question patterns (follow-up questions)
+    if any(w in t for w in ["what should", "how do", "how can", "what can", "any advice", "help me", "suggest"]):
+        return "seeking_advice"
+    
     return "neutral"
 
 def empathy_agent(emotion: str):
@@ -425,18 +439,27 @@ def empathy_agent(emotion: str):
         "fear": "reassurance",
         "joy": "celebration",
         "neutral": "listening",
+        "seeking_advice": "guidance",
     }.get(emotion, "listening")
 
 def response_agent(message, emotion, strategy):
-    prompt = f"""
-Emotion: {emotion}
-Empathy strategy: {strategy}
+    """Generate empathetic response using AI with better prompting."""
+    
+    # Better prompt with more context
+    prompt = f"""You are an empathetic AI assistant. Your role is to provide emotional support and helpful advice.
 
-User:
-"{message}"
+Current situation:
+- User's message: "{message}"
+- Detected emotion: {emotion}
+- Empathy strategy to use: {strategy}
 
-Respond empathetically in 2-3 sentences.
-"""
+Guidelines:
+- Be warm, caring, and understanding
+- If the user is asking for advice, provide practical suggestions
+- Keep your response conversational and natural (2-4 sentences)
+- Don't just acknowledge feelings, also offer helpful perspectives or advice when appropriate
+
+Respond now:"""
     # Try Gemini first (primary)
     try:
         return gemini(prompt)
@@ -455,15 +478,16 @@ Respond empathetically in 2-3 sentences.
     except Exception as e:
         print(f"Ollama error: {e}")
     
-    # Final fallback - hardcoded responses
+    # Final fallback - improved responses with advice
     fallbacks = {
-        "sadness": "I hear you, and I want you to know that your feelings are valid. It's okay to feel this way, and I'm here to listen.",
-        "anger": "I understand you're feeling frustrated. Those feelings make sense given what you're going through.",
-        "fear": "It's natural to feel anxious sometimes. Take a deep breath - you're not alone in this.",
-        "joy": "That's wonderful to hear! I'm so happy that you're feeling good!",
-        "neutral": "Thank you for sharing. I'm here to listen and support you however I can.",
+        "sadness": "I hear you, and I want you to know that your feelings are completely valid. When we're feeling down, it can help to talk to someone we trust, take a gentle walk, or simply allow ourselves to feel without judgment. What do you think might help you feel a bit better right now?",
+        "anger": "I understand you're feeling frustrated, and that makes total sense. When we're angry, it sometimes helps to take a few deep breaths, step away from the situation for a moment, or express those feelings in a healthy way like talking it out. What happened that made you feel this way?",
+        "fear": "It's completely natural to feel anxious sometimes. Remember that you've gotten through difficult times before, and you have the strength to handle this too. Would it help to break down what's worrying you into smaller, more manageable pieces?",
+        "joy": "That's wonderful to hear! I'm genuinely happy that you're feeling good! Savoring these positive moments is so important. What's contributing to your happiness today?",
+        "neutral": "I'm here and ready to listen. Sometimes just talking things through can help bring clarity. What's on your mind?",
+        "seeking_advice": "I'd love to help you think through this. Could you share a bit more about the situation? The more context you give me, the better I can offer suggestions that might actually be useful for you.",
     }
-    return fallbacks.get(emotion, "I'm here to listen. Please tell me more about how you're feeling.")
+    return fallbacks.get(emotion, "I'm here to listen and help however I can. Please tell me more about what's going on.")
 
 def log_agent(user, agent, message):
     db = SessionLocal()
