@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+body {
+  background-color: #ffffff;
+  color: #171717;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure form elements have proper styling */
+input {
+  color: #171717;
+  background-color: #ffffff;
+}
+
+input::placeholder {
+  color: #9ca3af;
+}
