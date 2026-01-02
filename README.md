@@ -163,11 +163,11 @@ The chatbot detects the following emotions:
 
 | Emotion | Trigger Words | Strategy |
 |---------|--------------|----------|
-| 😢 Sadness | sad, empty, lost | Comfort |
-| 😠 Anger | angry, mad | Validation |
-| 😨 Fear | fear, anxious | Reassurance |
-| 😊 Joy | happy, good | Celebration |
-| 😐 Neutral | (default) | Listening |
+|  Sadness | sad, empty, lost | Comfort |
+|  Anger | angry, mad | Validation |
+|  Fear | fear, anxious | Reassurance |
+|  Joy | happy, good | Celebration |
+|  Neutral | (default) | Listening |
 
 ##  Deployment
 
