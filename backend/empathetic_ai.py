@@ -356,8 +356,20 @@ def refresh(data: dict):
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def gemini(prompt: str):
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    return model.generate_content(prompt).text
+    """Call Gemini API - try multiple models."""
+    # Try gemini-pro first (more widely available)
+    try:
+        model = genai.GenerativeModel("gemini-pro")
+        return model.generate_content(prompt).text
+    except Exception as e1:
+        # Fallback to gemini-1.5-flash
+        try:
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            return model.generate_content(prompt).text
+        except Exception as e2:
+            # Try gemini-1.0-pro
+            model = genai.GenerativeModel("gemini-1.0-pro")
+            return model.generate_content(prompt).text
 
 def huggingface(prompt: str):
     """Call Hugging Face Inference API as cloud fallback."""
@@ -367,30 +379,41 @@ def huggingface(prompt: str):
     if not HF_API_KEY:
         raise ValueError("HUGGINGFACE_API_KEY not set")
     
-    # Using Mistral 7B Instruct model (good for empathetic responses)
-    API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
+    # Use Hugging Face's free inference models
+    # Try multiple models in order of preference
+    models = [
+        "HuggingFaceH4/zephyr-7b-beta",
+        "microsoft/DialoGPT-large",
+        "facebook/blenderbot-400M-distill",
+    ]
     
     headers = {"Authorization": f"Bearer {HF_API_KEY}"}
     
-    # Format prompt for Mistral
-    formatted_prompt = f"<s>[INST] {prompt} [/INST]"
+    for model_name in models:
+        try:
+            API_URL = f"https://api-inference.huggingface.co/models/{model_name}"
+            
+            payload = {
+                "inputs": prompt,
+                "parameters": {
+                    "max_new_tokens": 150,
+                    "temperature": 0.7,
+                    "return_full_text": False
+                }
+            }
+            
+            response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if isinstance(result, list) and len(result) > 0:
+                    return result[0].get("generated_text", "").strip()
+                return str(result)
+        except Exception as e:
+            print(f"HuggingFace model {model_name} failed: {e}")
+            continue
     
-    payload = {
-        "inputs": formatted_prompt,
-        "parameters": {
-            "max_new_tokens": 150,
-            "temperature": 0.7,
-            "return_full_text": False
-        }
-    }
-    
-    response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
-    response.raise_for_status()
-    
-    result = response.json()
-    if isinstance(result, list) and len(result) > 0:
-        return result[0].get("generated_text", "").strip()
-    return str(result)
+    raise Exception("All HuggingFace models failed")
 
 def ollama(prompt: str):
     """Run Ollama locally (only works on local machine, not in cloud)."""
