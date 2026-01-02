@@ -359,8 +359,41 @@ def gemini(prompt: str):
     model = genai.GenerativeModel("gemini-1.5-flash")
     return model.generate_content(prompt).text
 
+def huggingface(prompt: str):
+    """Call Hugging Face Inference API as cloud fallback."""
+    import requests
+    
+    HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+    if not HF_API_KEY:
+        raise ValueError("HUGGINGFACE_API_KEY not set")
+    
+    # Using Mistral 7B Instruct model (good for empathetic responses)
+    API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
+    
+    headers = {"Authorization": f"Bearer {HF_API_KEY}"}
+    
+    # Format prompt for Mistral
+    formatted_prompt = f"<s>[INST] {prompt} [/INST]"
+    
+    payload = {
+        "inputs": formatted_prompt,
+        "parameters": {
+            "max_new_tokens": 150,
+            "temperature": 0.7,
+            "return_full_text": False
+        }
+    }
+    
+    response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
+    response.raise_for_status()
+    
+    result = response.json()
+    if isinstance(result, list) and len(result) > 0:
+        return result[0].get("generated_text", "").strip()
+    return str(result)
+
 def ollama(prompt: str):
-    """Run Ollama with sanitized input."""
+    """Run Ollama locally (only works on local machine, not in cloud)."""
     # Sanitize: limit length and remove potentially dangerous characters
     safe_prompt = prompt[:2000].replace('\x00', '')
     
@@ -404,23 +437,33 @@ User:
 
 Respond empathetically in 2-3 sentences.
 """
+    # Try Gemini first (primary)
     try:
         return gemini(prompt)
     except Exception as e:
         print(f"Gemini error: {e}")
-        try:
-            return ollama(prompt)
-        except Exception as e2:
-            print(f"Ollama error: {e2}")
-            # Fallback responses based on emotion
-            fallbacks = {
-                "sadness": "I hear you, and I want you to know that your feelings are valid. It's okay to feel this way, and I'm here to listen.",
-                "anger": "I understand you're feeling frustrated. Those feelings make sense given what you're going through.",
-                "fear": "It's natural to feel anxious sometimes. Take a deep breath - you're not alone in this.",
-                "joy": "That's wonderful to hear! I'm so happy that you're feeling good!",
-                "neutral": "Thank you for sharing. I'm here to listen and support you however I can.",
-            }
-            return fallbacks.get(emotion, "I'm here to listen. Please tell me more about how you're feeling.")
+    
+    # Try Hugging Face (cloud fallback)
+    try:
+        return huggingface(prompt)
+    except Exception as e:
+        print(f"Hugging Face error: {e}")
+    
+    # Try Ollama (local fallback - only works locally)
+    try:
+        return ollama(prompt)
+    except Exception as e:
+        print(f"Ollama error: {e}")
+    
+    # Final fallback - hardcoded responses
+    fallbacks = {
+        "sadness": "I hear you, and I want you to know that your feelings are valid. It's okay to feel this way, and I'm here to listen.",
+        "anger": "I understand you're feeling frustrated. Those feelings make sense given what you're going through.",
+        "fear": "It's natural to feel anxious sometimes. Take a deep breath - you're not alone in this.",
+        "joy": "That's wonderful to hear! I'm so happy that you're feeling good!",
+        "neutral": "Thank you for sharing. I'm here to listen and support you however I can.",
+    }
+    return fallbacks.get(emotion, "I'm here to listen. Please tell me more about how you're feeling.")
 
 def log_agent(user, agent, message):
     db = SessionLocal()
