@@ -263,7 +263,8 @@ def login(data: dict):
 # ==================== GOOGLE OAUTH ====================
 from starlette.config import Config
 
-config = Config('.env')
+# Use environ for production (no .env file needed)
+config = Config(environ=os.environ)
 oauth = OAuth(config)
 oauth.register(
     name="google",
