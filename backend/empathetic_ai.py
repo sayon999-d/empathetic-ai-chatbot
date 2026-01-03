@@ -357,19 +357,26 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def gemini(prompt: str):
     """Call Gemini API - try multiple models."""
-    # Try gemini-pro first (more widely available)
-    try:
-        model = genai.GenerativeModel("gemini-pro")
-        return model.generate_content(prompt).text
-    except Exception as e1:
-        # Fallback to gemini-1.5-flash
+    models_to_try = [
+        "gemini-1.5-pro",
+        "gemini-1.5-flash", 
+        "gemini-pro",
+        "models/gemini-pro",
+    ]
+    
+    last_error = None
+    for model_name in models_to_try:
         try:
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            return model.generate_content(prompt).text
-        except Exception as e2:
-            # Try gemini-1.0-pro
-            model = genai.GenerativeModel("gemini-1.0-pro")
-            return model.generate_content(prompt).text
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            if response and response.text:
+                return response.text
+        except Exception as e:
+            last_error = e
+            print(f"Gemini model {model_name} failed: {e}")
+            continue
+    
+    raise Exception(f"All Gemini models failed. Last error: {last_error}")
 
 def huggingface(prompt: str):
     """Call Hugging Face Inference API as cloud fallback."""
