@@ -89,6 +89,6 @@ jobs:
     steps:
       - name: Deploy notification
         run: |
-          echo "✅ CI passed! Render and Vercel will auto-deploy from main branch."
-          echo "🚀 Backend: https://empathetic-ai-chatbot.onrender.com"
-          echo "🎨 Frontend: https://empathetic-ai-chatbot-t1bx.vercel.app"
+          echo " CI passed! Render and Vercel will auto-deploy from main branch."
+          echo " Backend: https://empathetic-ai-chatbot.onrender.com"
+          echo " Frontend: https://empathetic-ai-chatbot-t1bx.vercel.app"

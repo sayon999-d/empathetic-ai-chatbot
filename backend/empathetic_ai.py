@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from authlib.integrations.starlette_client import OAuth
 import google.generativeai as genai
 import redis
-import subprocess
 import os
 import json
 import uuid
