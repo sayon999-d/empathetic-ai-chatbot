@@ -352,7 +352,7 @@ def refresh(data: dict):
     except JWTError:
         return {"error": "Invalid refresh token"}
 
-# ==================== GEMINI + OLLAMA ====================
+# ==================== AI SERVICES: GEMINI + OPENROUTER + HUGGINGFACE ====================
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def gemini(prompt: str):
@@ -378,6 +378,60 @@ def gemini(prompt: str):
     
     raise Exception(f"All Gemini models failed. Last error: {last_error}")
 
+def openrouter(prompt: str):
+    """Call OpenRouter API - unified access to multiple AI models."""
+    import requests
+    
+    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+    if not OPENROUTER_API_KEY:
+        raise ValueError("OPENROUTER_API_KEY not set")
+    
+    # OpenRouter provides access to many models - try free/cheap ones
+    models_to_try = [
+        "mistralai/mistral-7b-instruct:free",
+        "google/gemma-7b-it:free",
+        "huggingfaceh4/zephyr-7b-beta:free",
+        "openchat/openchat-7b:free",
+    ]
+    
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": os.getenv("FRONTEND_URL", "http://localhost:3000"),
+        "X-Title": "Empathetic AI Chatbot"
+    }
+    
+    last_error = None
+    for model in models_to_try:
+        try:
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": "You are an empathetic AI assistant that provides emotional support."},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 200,
+                "temperature": 0.7
+            }
+            
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                if result.get("choices") and len(result["choices"]) > 0:
+                    return result["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            last_error = e
+            print(f"OpenRouter model {model} failed: {e}")
+            continue
+    
+    raise Exception(f"All OpenRouter models failed. Last error: {last_error}")
+
 def huggingface(prompt: str):
     """Call Hugging Face Inference API as cloud fallback."""
     import requests
@@ -387,7 +441,6 @@ def huggingface(prompt: str):
         raise ValueError("HUGGINGFACE_API_KEY not set")
     
     # Use Hugging Face's free inference models
-    # Try multiple models in order of preference
     models = [
         "HuggingFaceH4/zephyr-7b-beta",
         "microsoft/DialoGPT-large",
@@ -421,20 +474,6 @@ def huggingface(prompt: str):
             continue
     
     raise Exception("All HuggingFace models failed")
-
-def ollama(prompt: str):
-    """Run Ollama locally (only works on local machine, not in cloud)."""
-    # Sanitize: limit length and remove potentially dangerous characters
-    safe_prompt = prompt[:2000].replace('\x00', '')
-    
-    r = subprocess.run(
-        ["ollama", "run", "mistral"],
-        input=safe_prompt,
-        text=True,
-        capture_output=True,
-        timeout=30,
-    )
-    return r.stdout.strip()
 
 def emotion_agent(text: str):
     """Detect emotion from text using keyword matching."""
@@ -502,11 +541,11 @@ Respond now:"""
     except Exception as e:
         print(f"Hugging Face error: {e}")
     
-    # Try Ollama (local fallback - only works locally)
+    # Try OpenRouter (unified API fallback)
     try:
-        return ollama(prompt)
+        return openrouter(prompt)
     except Exception as e:
-        print(f"Ollama error: {e}")
+        print(f"OpenRouter error: {e}")
     
     # Final fallback - improved responses with advice
     fallbacks = {
@@ -535,7 +574,10 @@ def summarize_long_term(user):
     try:
         summary = gemini(prompt)
     except:
-        summary = ollama(prompt)
+        try:
+            summary = openrouter(prompt)
+        except:
+            summary = "Unable to generate summary at this time."
 
     db = SessionLocal()
     try:
